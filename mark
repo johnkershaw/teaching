@@ -1,0 +1,47 @@
+# In 'Files' sidebar, copy & paste student work
+
+# regex_sql
+# -- Q1 A question goes here [2/3]
+# -- Q2 Another questions [2/2]
+# -- Q3 Some test here [7/8]
+# https://regexr.com/423ph
+
+# regex_rubric
+# 7/10 Contrast
+# 8/10 Repetition
+# 8/10 Alignment
+# 7/10 Grouping
+# 30/40 Info
+# 15/20 Wow
+
+quiz = 'sql' # plain | sql
+
+regex = {}
+regex['sql'] = ( # eg -- Q1. Question [1/2]
+"^(?:-- )?" # start of line, optional -- (SQL comment)
+"((?:Q\d+[a-z]?\.)|\w+)" # words, opt prefaced with Q1.
+"[^\n[]+"  # text other than a line break or [
+"\[?" # optional opening [
+"\s*(\d+)\s*\/\s*(\d+)\s*" # digits / digits
+"\]?" # optional closing ]
+)
+
+regex['plain'] = r"^()(\d+) ?\/ ?(\d+)"
+
+
+import re
+source = open("student.txt", "r").read()
+
+lsum, rsum, q_check = 0,0,0
+text = ""
+
+for qn, lt, rt in re.findall(regex[quiz], source, flags=re.M):
+  if not len(qn) or qn[0]!='Q':
+    qn = ""  
+  text += f"{qn: <5}{lt: >3} / {rt: <3}\n"
+  lsum+=int(lt)
+  rsum+=int(rt)
+
+text += f"\n{lsum: >8} / {rsum: <3} =  {100*lsum/rsum:0.0f} %\n"
+
+print (text)
