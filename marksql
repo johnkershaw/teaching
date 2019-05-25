@@ -1,0 +1,101 @@
+# Paste student written SQL code into 'student.sql' then RUN
+
+import sqlite3
+
+conn = sqlite3.connect("myDatabase.db")
+cursor = conn.cursor()
+
+cursor.execute("DROP TABLE IF EXISTS staff")
+cursor.execute("DROP TABLE IF EXISTS staff2")
+
+sql = {}
+sql['correct'] = open("correct.sql", "r").read().strip().split(";")
+sql['student'] = open("student.sql", "r").read().strip().split(";")
+
+scores = [2,2]
+
+output = [
+  "\n==============================\n",
+  "Q1. PASS [ 2 / 2 ]",
+  "\n==============================\n",
+  "Q2. PASS [ 2 / 2 ]"
+  ]
+
+print ("\nSQL Auto Marker\nhttps://repl.it/@johnkershaw/marksql")
+
+for i in range(len(sql['correct']) - 1):
+  line2 = sql['correct'][i].strip()
+  cursor.execute (line2)
+  data2 = cursor.fetchall()
+
+  if len(sql ['student'] ) > i:
+    line = sql['student'][i].strip()
+    cursor.execute (line)
+    data = cursor.fetchall()
+  else:
+    line = data = ""
+
+  if i > 5 and data2:
+    output.append (f"\n{'=' * 30}\n")
+
+    if i >= len(sql['student']) or not sql['student'][i]:
+      score = 0
+      output.append (f"Q{i-3}. NOT ATTEMPTED [ {score} / 2 ]")
+      output.append ("\n=== Correct SQL ===\n")
+      output.append (line2)
+      output.append ("\n=== Correct Output ===\n")
+      output.append (str(data2))
+           
+    elif data2 == data:
+      score = 2
+      output.append (f"Q{i-3}. PASS [ {score} / 2 ]")
+  
+    else:
+      score = 0
+      output.append (f"Q{i-3}. FAIL [ {score} / 2 ]")
+      output.append ("\n=== Correct SQL ===\n")
+      output.append (line2)
+      output.append ("\n=== Student SQL ===\n")
+      output.append (line)
+      output.append (f"\n{'-' * 30}")
+
+      output.append ("\n=== Correct Output ===\n")
+      output.append (str(data2))
+      output.append ("\n=== Student Output ===\n")
+      output.append (str(data))  
+
+    if line[:6] != line2[:6]:
+      output.append ("\nWARNING START:" * 8)
+      output.append ("\nFIX student.sql AND RE-RUN\nQuestions are out of sync - checker splits student.sql into questions by looking for ; at end of each line of SQL. If missing / not attempted, add one or more ; on empty lines in student.sql to make it 'line up' with correct.sql\n")
+      output.append ("Expected: " + line2[:6])
+      output.append ("Student:  " + line[:6])
+      output.append ("\n                     :WARNING END" * 8)
+      
+    scores.append(score)
+  
+
+print ("\n".join(output))
+
+scores = scores
+
+final_text = "\n".join([ f"Q{i+1}. {s} / 2" for i,s in enumerate(scores)])
+final_text += f"\nTotal: {sum(scores)} / 24"
+
+print ("\n")
+print (final_text)
+
+'''
+Q1. 2 / 2
+Q2. 2 / 2
+Q3. 2 / 2
+Q4. 2 / 2
+Q5. 2 / 2
+Q6. 2 / 2
+Q7. 0 / 2
+Q8. 0 / 2
+Q9. 2 / 2
+Q10. 0 / 2
+Q11. 2 / 2
+Q12. 0 / 2
+Total: 16 / 24
+'''
